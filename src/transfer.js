@@ -52,7 +52,7 @@ function RegisterOperations({ user, navigation, banks, getBanks }) {
 
         <Text style={{ fontSize: 18 }}>
           Digite o valor que você quer transferir
-      </Text>
+        </Text>
         <Input
           placeholder={"0.00"}
           keyboardType={"numeric"}
@@ -66,7 +66,7 @@ function RegisterOperations({ user, navigation, banks, getBanks }) {
 
         <Text style={{ fontSize: 18 }}>
           Escolha o banco de onde quer transferir
-      </Text>
+        </Text>
         <Box status={banks} style={{ height: "18%", margin: "3%" }} boxing={(list) => <FlatList
           data={list}
           renderItem={({ item }) =>
@@ -139,7 +139,7 @@ function RegisterOperations({ user, navigation, banks, getBanks }) {
       <View style={{ justifyContent: "center", height: "100%", width: "100%", alignItems: "center" }}>
         <Text style={{ fontSize: 18 }}>
           Escolha agora a conta que ira receber
-      </Text>
+        </Text>
         <Box status={{ loaded: banks.loaded, list: banks.list.filter(({ id }) => id != transference.current.sender) }} style={{ height: "18%", margin: "3%" }} boxing={(list) => <FlatList
           data={list}
           renderItem={({ item }) =>
@@ -187,7 +187,7 @@ function RegisterOperations({ user, navigation, banks, getBanks }) {
                       if (future_callback.current != null) {
                         future_callback.current()
                       }
-                    }, () => {})
+                    }, () => { })
                 }, () => {
                   // provavelmente problemas de conexão, podemos ignorar desde que não atualiza o redux
                 })
