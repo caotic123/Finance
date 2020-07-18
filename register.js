@@ -5,26 +5,20 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Icon, Input, Button, Overlay } from 'react-native-elements'
 import { useDispatch } from 'react-redux';
 import { useRef } from 'react';
-import { client, validError } from "./connection"
+import { client, validError, try_register } from "./connection"
 import { Dialog } from "./dialog"
-import {Loader} from "./loader"
+import { Loader } from "./loader"
 
-function Register(props) {
+export default function Register(props) {
 
-  const {navigation} = props
+  const { navigation } = props
   const [register, set_input] = useState({ user: "", password: "", email: "" })
   const [status_msg, set_msg] = useState({ visible: false, msg: "" })
+  const [waiting, set_wait] = useState(false)
 
   const send_msg = (msg) => {
     set_msg(prev => ({ visible: true, msg: msg }))
   }
-
-  const try_register = (r, error) =>
-    client.post("auth/local/register", {
-      username: register.user,
-      email: register.email,
-      password: register.password
-    }).then(() => r()).catch(err => error(err))
 
   return (
     <View style={styles.container}>
@@ -66,6 +60,7 @@ function Register(props) {
         <Input
           placeholder="Senha"
           inputStyle={{ color: "white" }}
+          secureTextEntry={true} 
           onChangeText={text => {
             set_input(prev => ({ ...prev, password: text }))
           }}
@@ -79,29 +74,37 @@ function Register(props) {
           }
         />
 
-        <Button title={"Registrar"} containerStyle = {{padding : 10}} onPress={() =>
-         
-          try_register(() => {
+        <Button title={"Registrar"} containerStyle={{ padding: 10 }} onPress={() => {
+          //Se estiver esperando requisição não aceite novas requisições
+          if (waiting) { return; }
+          set_wait(true)
+
+          try_register(register, () => {
+            set_wait(false)
             send_msg("Conta criada com sucesso")
           }, (err) => {
 
             validError(err, () => {
+              set_wait(false)
               send_msg("Servidor inalcançável")
             }, (err) => {
+              set_wait(false)
               send_msg(err)
             })
           })
+        }
         } />
-
-        <Button title={"Logar?"} containerStyle = {{padding : 10}} onPress={() =>
-          navigation.navigate("Login") 
-        }/>
+        <Button title={"Logar?"} containerStyle={{ padding: 10 }} onPress={() =>
+          navigation.navigate("Login")
+        } />
 
       </View>
 
       <Dialog status={status_msg} onPress={() =>
         set_msg(prev => ({ ...prev, visible: false }))
       } />
+
+      <Loader actived={waiting} />
 
     </View>
   )
@@ -116,10 +119,3 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(1, 21, 101, 0.7)"
   }
 });
-
-const mapStateToProps = ({ }) => ({});
-const mapDispatchToProps = {};
-
-export default connect(mapStateToProps, mapDispatchToProps)(Register);
-
-

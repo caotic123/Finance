@@ -1,30 +1,41 @@
 import React, { Component, useState, useEffect } from 'react';
-import { StyleSheet, View, Text, ActivityIndicator } from 'react-native';
-import { connect } from "react-redux"
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { StyleSheet, View, Text, ActivityIndicator, Image } from 'react-native';
 import { Icon, Input, Button, Overlay, ButtonGroup } from 'react-native-elements'
-import { insert_login } from './actions'
-import { useDispatch } from 'react-redux';
-import { useRef } from 'react';
-import { validError } from "./connection"
+import { validError, client, do_login } from "./connection"
 import { Loader } from "./loader"
 import { Dialog } from "./dialog"
+import { useFocusEffect } from '@react-navigation/native';
+import { enter_login, isDataSaved, isSensorAvaliable, checkLocalUserID } from "./navigation"
 
-function Login(props) {
-  const { navigation, insert_login, user_info: { login_info } } = props
+export default function Login(props) {
+  const { navigation } = props
   const [state, set_error_msg] = useState({ visible: false, msg: "" })
   const [actived, set_status] = useState(false)
-  const dispatch = useDispatch();
 
   const [login_input, set_input] = useState({ user: "", password: "" })
-  // console.log(login_info.sucess, !login_info.sucess, login_info != null ? !login_info.sucess : false)
+  useFocusEffect(React.useCallback(() => {
+    (async () => {
+      const data = await isDataSaved()
+      if (data != null && await checkLocalUserID()) {
+        set_input(JSON.parse(data))
+      }
+    })();
+  }, []))
+
+
+  // Isso não é nada seguro, mas por meios simplorios funciona, uma adptação seria encryptar os dados
+  // com a chave do fingerpint
+
   return (
     <View style={styles.container}>
-
-      <Loader actived={actived} />
-      <Text style={styles.logo}>
-        Logo here
-         </Text>
+      <Loader actived={actived}/>
+      <Image
+        style={{height : "20%", width : "30%", margin : "10%"}}
+        source={{
+          uri: 'https://i.ibb.co/d7zwzq7/Logo-Makr-7a7xy-G.png',
+        }}
+      />
+      
       <View style={styles.container_login}>
 
         <View style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 0.3)" }}>
@@ -37,6 +48,7 @@ function Login(props) {
             onChangeText={text => {
               set_input(prev => ({ ...prev, user: text }))
             }}
+            value={login_input.user}
             leftIcon={
               <Icon
                 name='user'
@@ -49,9 +61,11 @@ function Login(props) {
           <Input
             placeholder="Senha"
             inputStyle={{ color: "white" }}
+            secureTextEntry={true}
             onChangeText={text => {
               set_input(prev => ({ ...prev, password: text }))
             }}
+            value={login_input.password}
             leftIcon={
               <Icon
                 name='lock'
@@ -62,79 +76,85 @@ function Login(props) {
             }
           />
         </View>
-        <View style={{ flex : 1, flexDirection : "row", justifyContent : "space-between" }}>
-        <Button
-          title="Entrar"
-          titleStyle={{ color: "white" }}
-        buttonStyle={{ backgroundColor: "rgba(0, 0, 0, 0.6)" }}
-        containerStyle = {{padding : 6}}
-        type="outline"
-          icon={
-          <Icon
-            name="enter-outline"
-            type="ionicon"
-            size={22}
-            color="white"
-            containerStyle={{ padding: 4 }}
-          />
-        }
-        
-        onPress={() => {
-
-          if (actived) { return; }
-
-          const validateInput = (where) => {
-            if (where(login_input).length < 1) {
-              set_error_msg({ visible: true, msg: "Por favor insira um(a) " + (where({ user: "usuario", password: "senha" }) + " valido") })
-              return false;
+        <View style={{ flex: 0, flexDirection: "row", justifyContent: "space-between" }}>
+          <Button
+            title="Entrar"
+            titleStyle={{ color: "white" }}
+            buttonStyle={{ backgroundColor: "rgba(0, 0, 0, 0.6)" }}
+            containerStyle={{ padding: 6 }}
+            type="outline"
+            icon={
+              <Icon
+                name="enter-outline"
+                type="ionicon"
+                size={22}
+                color="white"
+                containerStyle={{ padding: 4 }}
+              />
             }
-            return true;
-          }
 
-          if (validateInput(obj => obj.user) && validateInput(obj => obj.password)) {
-            set_error_msg(prev => ({ ...prev, visible: false }))
-            set_status(true)
-            insert_login({
-              ...login_input,
-              onSucess: (data) => {
-                set_status(false)
-                return true
-              }, onFail: (res) => {
-                set_status(false)
-                validError(res.error, () => {
-                  set_error_msg({ visible: true, msg: "Servidor não encontrado" })
-                }, (msgs) => {
-                  set_error_msg({ visible: true, msg: msgs })
-                })
+            onPress={() => {
+
+              //Se estiver esperando uma requisição simplesmente não requisite nova
+              if (actived) { return; }
+
+              const validateInput = (where) => {
+                if (where(login_input).length < 1) {
+                  set_error_msg({ visible: true, msg: "Por favor insira um(a) " + (where({ user: "usuario", password: "senha" }) + " valido") })
+                  return false;
+                }
+                return true;
               }
-            })
-          }
-        }}
-        />
-        <Button
-          title="Registrar"
-          titleStyle={{ color: "white" }}
-          containerStyle = {{padding : 6}}
-          buttonStyle={{ backgroundColor: "rgba(0, 0, 0, 0.6)" }}
-          type="outline"
-          onPress = {() => {
-            navigation.navigate("Register")
-          }}
-          icon={
-            <Icon
-              name="enter-outline"
-              type="ionicon"
-              size={22}
-              color="white"
-              containerStyle={{ padding: 4 }}
-            />
-          } />
-      </View>
-    </View>
 
-    <Dialog status={state} onPress={() => {
-      set_error_msg(prev => ({ ...prev, visible: false }))
-    }} />
+              // Valida os inputs 
+              if (validateInput(obj => obj.user) && validateInput(obj => obj.password)) {
+                set_error_msg(prev => ({ ...prev, visible: false }))
+                set_status(true)
+                do_login(login_input,
+                  async (data) => {
+                    set_status(false)
+                    enter_login(login_input, data)
+                  }, (res) => {
+                    //Login Falho
+                    set_status(false)
+                    // Verifica se há resposta para o erro, se não o erro é devido a falta de alcance ao servidor
+                    validError(res, () => {
+                      set_error_msg({ visible: true, msg: "Servidor não encontrado" })
+                    }, (msgs) => {
+                      //Se tiver msgs de erros do servidor apenas mostre-a para o usuario
+                      set_error_msg({ visible: true, msg: msgs })
+                    })
+                  }
+                )
+              }
+            }}
+
+          />
+          <Button
+            title="Registrar"
+            titleStyle={{ color: "white" }}
+            containerStyle={{ padding: 6 }}
+            buttonStyle={{ backgroundColor: "rgba(0, 0, 0, 0.6)" }}
+            type="outline"
+            onPress={() => {
+              navigation.navigate("Register")
+            }}
+            icon={
+              <Icon
+                name="enter-outline"
+                type="ionicon"
+                size={22}
+                color="white"
+                containerStyle={{ padding: 4 }}
+              />
+            } />
+            
+        </View>
+      </View>
+  
+      <Dialog status={state} onPress={() => {
+        set_error_msg(prev => ({ ...prev, visible: false }))
+      }} />
 
 
     </View >
@@ -156,16 +176,10 @@ const styles = StyleSheet.create({
   },
 
   container_login: {
-    position: "absolute",
-    top: "40%",
+    width : "80%",
+    
     alignItems: 'center',
     justifyContent: 'center',
   },
 });
-
-const mapStateToProps = ({ user_info }) => ({ user_info });
-const mapDispatchToProps = { insert_login };
-
-export default connect(mapStateToProps, mapDispatchToProps)(Login);
-
 
