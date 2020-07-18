@@ -5,9 +5,9 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Icon, Input, Button, Overlay } from 'react-native-elements'
 import { useDispatch } from 'react-redux';
 import { useRef } from 'react';
-import { client, validError, try_register } from "./connection"
-import { Dialog } from "./dialog"
-import { Loader } from "./loader"
+import { client, validError, try_register } from "./ultils/connection"
+import { Dialog } from "./ultils/components/dialog"
+import { Loader } from "./ultils/components/loader"
 
 export default function Register(props) {
 

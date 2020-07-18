@@ -5,9 +5,9 @@ import { Icon, Input, Button, Overlay, Divider } from 'react-native-elements'
 import { ListItem } from 'react-native-elements'
 import { useFocusEffect } from '@react-navigation/native';
 import Bar from "./bar"
-import Box from "./box"
-import { getBanks, getOperations } from "./actions"
-import { client } from './connection';
+import Box from "./ultils/components/box"
+import { getBanks, getOperations } from "./ultils/redux/actions"
+import { client } from './ultils/connection';
 import SafeArea from 'react-native-safe-area';
 import { SafeAreaView } from 'react-native-safe-area-context';
 

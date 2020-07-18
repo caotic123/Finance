@@ -1,11 +1,11 @@
 import React, { Component, useState, useEffect } from 'react';
 import { StyleSheet, View, Text, ActivityIndicator, Image } from 'react-native';
 import { Icon, Input, Button, Overlay, ButtonGroup } from 'react-native-elements'
-import { validError, client, do_login } from "./connection"
-import { Loader } from "./loader"
-import { Dialog } from "./dialog"
+import { validError, client, do_login } from "./ultils/connection"
+import { Loader } from "./ultils/components/loader"
+import { Dialog } from "./ultils/components/dialog"
 import { useFocusEffect } from '@react-navigation/native';
-import { enter_login, isDataSaved, isSensorAvaliable, checkLocalUserID } from "./navigation"
+import { enter_login, isDataSaved, isSensorAvaliable, checkLocalUserID } from "./ultils/navigation"
 
 export default function Login(props) {
   const { navigation } = props

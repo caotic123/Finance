@@ -2,7 +2,7 @@ import React, { Component, useState, useEffect } from 'react';
 import { StyleSheet, View, Text, ActivityIndicator } from 'react-native';
 import { Header, Icon } from 'react-native-elements'
 import { connect } from "react-redux"
-import {logout} from "./navigation"
+import {logout} from "./ultils/navigation"
 
 function Bar({user : {user}}) {
   

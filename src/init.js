@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import Main from "./main"
 import Operations from "./operations"
 import Transferences from "./transfer"
-import {container} from "./store"
+import {container} from "./ultils/store"
 import { NavigationContainer } from '@react-navigation/native';
 import { Provider } from 'react-redux';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';

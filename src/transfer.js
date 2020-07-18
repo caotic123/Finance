@@ -3,13 +3,13 @@ import { StyleSheet, View, Text, ActivityIndicator, FlatList } from 'react-nativ
 import { connect } from "react-redux"
 import { Icon, Input, Button, Overlay, Divider, CheckBox } from 'react-native-elements'
 import { ListItem } from 'react-native-elements'
-import { createOperation } from "./connection"
+import { createOperation } from "./ultils/connection"
 import { useFocusEffect } from '@react-navigation/native';
-import { getBanks } from "./actions"
+import { getBanks } from "./ultils/redux/actions"
 import Bar from "./bar"
-import Box from "./box"
-import { Dialog } from "./dialog"
-import { Loader } from "./loader"
+import Box from "./ultils/components/box"
+import { Dialog } from "./ultils/components/dialog"
+import { Loader } from "./ultils/components/loader"
 import { set } from 'react-native-reanimated';
 
 const SCREENS_STATUS = {
